@@ -163,16 +163,17 @@ def analytics(start_date, end_date, out):
 @click.command(help="Get incident log data in the data/incident_log.json file for further analysis")
 @click.option("--start-date", help="Format YYYY-mm-dd", default="")
 @click.option("--end-date", help="Format YYYY-mm-dd", default="")
-@click.option("--out", help="Path where to output the data", default="data/incident_log.json")
+@click.option("--out", help="Path where to output the data", default="data/incident_log.csv")
 def incidents_log(start_date, end_date, out):
     token = configure_key("pagerduty.token", hide=True)
     team_name = configure_key("pagerduty.team")
 
     incidents = get_incidents_log(team_name, token, start_date, end_date)
-    with open(out, "w") as f:
-        json.dump(incidents, f)
+    df = pandas.DataFrame(incidents)
+    click.echo(df.describe())
+    df.to_csv(path_or_buf=out)
 
-    click.echo(f"Saved to data/incident_log.json")
+    click.echo(f"Saved to {out}")
 
 
 pagerduty.add_command(analytics)
